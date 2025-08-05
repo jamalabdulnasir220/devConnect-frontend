@@ -4,3 +4,4 @@
 - Used Vite as my bundler
 - Used the tailwindcss
 - Used daisyUI
+- React router package for the routing
