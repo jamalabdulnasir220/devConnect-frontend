@@ -5,3 +5,4 @@
 - Used the tailwindcss
 - Used daisyUI
 - React router package for the routing
+- Login page created
