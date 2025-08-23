@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { userAdded } from "../api/userSlice";
@@ -10,6 +10,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = React.useState("salman@gmail.com");
   const [password, setPassword] = React.useState("Salman@13");
+  const [errMessage, setErrMessage] = useState("");
 
   const handleLogin = async () => {
     try {
@@ -25,7 +26,7 @@ const Login = () => {
       navigate("/");
       console.log("Login successful:", result.data);
     } catch (error) {
-      console.error("Login failed:", error);
+      setErrMessage(error?.response?.data)
     }
   };
 
@@ -54,6 +55,7 @@ const Login = () => {
               />
             </fieldset>
           </div>
+          <p className="text-red-500">{errMessage}</p>
           <div className="card-actions justify-center">
             <button className="btn btn-primary" onClick={handleLogin}>
               Login
