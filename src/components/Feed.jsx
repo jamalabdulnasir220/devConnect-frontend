@@ -28,7 +28,7 @@ const Feed = () => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center my-10">
+    <div className="max-h-full flex justify-center mt-20">
       <UserCard user={feed?.feedUsers[0]} />
     </div>
   );
