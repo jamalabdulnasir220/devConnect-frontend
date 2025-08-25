@@ -14,7 +14,10 @@ const Body = () => {
   const userData = useSelector(selectUser);
 
   const fetchUsers = async () => {
-    if (!userData) return;
+    if (!userData) {
+      navigate("/login");
+      return;
+    }
     try {
       const res = await axios.get(BASE_URL + "/profile/view", {
         withCredentials: true,
