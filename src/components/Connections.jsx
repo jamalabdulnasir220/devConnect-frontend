@@ -4,6 +4,7 @@ import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { connectionAdded, selectedConnection } from "../api/connectionSlice";
 import { selectUser } from "../api/userSlice";
+import { Link } from "react-router";
 
 const Connections = () => {
   const dispatch = useDispatch();
@@ -27,8 +28,26 @@ const Connections = () => {
     fetchConnections();
   }, []);
 
-  if (!connections || connections?.length === 0) <h1>No connections found</h1>;
-  //   if (storedConnections.length === 0) return <h1>No connections found</h1>;
+  if (!connections || connections?.length === 0)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
+          alt="No connections"
+          className="w-40 h-40 mb-6 opacity-70"
+        />
+        <h1 className="text-2xl font-bold text-gray-700 mb-2">No Connections Found</h1>
+        <p className="text-gray-500 mb-4">
+          You haven't made any connections yet. Start exploring and connect with new people!
+        </p>
+        <Link
+          to="/"
+          className="btn btn-primary px-6 py-2 rounded-full shadow hover:scale-105 transition-transform"
+        >
+          Go to Feed
+        </Link>
+      </div>
+    );
   return (
     <div className="text-center my-10">
       <h1 className="font-bold text-3xl">Connections</h1>

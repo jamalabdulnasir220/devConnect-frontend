@@ -46,8 +46,23 @@ const Request = () => {
     fetchRequests();
   }, []);
 
-  if (!requests || requests?.length === 0) return <h1>No requests found</h1>;
-  //   if (storedConnections.length === 0) return <h1>No connections found</h1>;
+  if (!requests || requests?.length === 0)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
+          alt="No requests"
+          className="w-40 h-40 mb-6 opacity-70"
+        />
+        <h1 className="text-2xl font-bold text-gray-700 mb-2">
+          No Requests Found
+        </h1>
+        <p className="text-gray-500 mb-4">
+          You have no new connection requests at the moment. Check back later or
+          explore to connect with more people!
+        </p>
+      </div>
+    );
   return (
     <div className="text-center my-10">
       <h1 className="font-bold text-3xl">Connection Request</h1>
@@ -55,7 +70,7 @@ const Request = () => {
         {requests?.map((request) => (
           <div
             key={request?.fromUserId?.firstName}
-            className="flex flex-col w-1/5 items-center justify-between rounded-3xl shadow-2xl bg-gray-900 p-5 hover:opacity-75"
+            className="flex flex-col w-1/5 items-center justify-between rounded-3xl shadow-2xl bg-gray-900 p-5 hover:opacity-75 gap-5"
           >
             <div className="">
               <img
