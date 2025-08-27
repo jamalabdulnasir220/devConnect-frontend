@@ -14,8 +14,11 @@ const Login = () => {
   const [password, setPassword] = React.useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [errMessage, setErrMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
+    setIsLoading(true);
+    setErrMessage("");
     try {
       const result = await axios.post(
         BASE_URL + "/login",
@@ -29,10 +32,14 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       setErrMessage(error?.response?.data);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSignUp = async () => {
+    setIsLoading(true);
+    setErrMessage("");
     try {
       const res = await axios.post(
         `${BASE_URL}/signup`,
@@ -50,6 +57,8 @@ const Login = () => {
     } catch (error) {
       console.log(error);
       setErrMessage(error?.response?.data);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -110,8 +119,16 @@ const Login = () => {
             <button
               className="btn btn-primary w-full mt-2"
               onClick={isLogin ? handleLogin : handleSignUp}
+              disabled={isLoading}
             >
-              {isLogin ? "Login" : "Sign Up"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <span className="loading loading-spinner loading-sm"></span>
+                  {isLogin ? "Logging in..." : "Creating account..."}
+                </div>
+              ) : (
+                isLogin ? "Login" : "Sign Up"
+              )}
             </button>
           </div>
           <p
