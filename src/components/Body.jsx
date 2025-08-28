@@ -42,7 +42,7 @@ const Body = () => {
       <main className="flex-1 px-4 py-4 max-w-7xl mx-auto w-full ">
         <Outlet />
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };
