@@ -12,18 +12,17 @@ const Feed = () => {
   const userData = useSelector(selectUser);
 
   const fetchFeed = async () => {
-    if (feed || !userData) return;
+    if (!userData) return;
     try {
       const res = await axios.get(BASE_URL + "/user/feed", {
         withCredentials: true,
       });
-    
+
       dispatch(feedAdded(res?.data?.feedUsers));
     } catch (error) {
       console.error(error);
     }
   };
-
 
   useEffect(() => {
     fetchFeed();
@@ -41,7 +40,8 @@ const Feed = () => {
           No Feed Available
         </h1>
         <p className="text-gray-500 mb-4">
-          There are currently no new users to show in your feed. Check back later or update your profile to get better matches!
+          There are currently no new users to show in your feed. Check back
+          later or update your profile to get better matches!
         </p>
       </div>
     );

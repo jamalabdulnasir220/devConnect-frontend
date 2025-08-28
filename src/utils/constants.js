@@ -1,1 +1,1 @@
-export const BASE_URL = "http://localhost:3000"
+export const BASE_URL = "https://gittogether-2xw8.onrender.com"
