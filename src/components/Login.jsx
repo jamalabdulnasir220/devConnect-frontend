@@ -62,14 +62,14 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center my-10">
-      <div className="card card-border bg-base-300 w-96">
-        <div className="card-body">
-          <div className="flex flex-col items-center mb-6">
-            <h2 className="card-title text-3xl font-bold text-center text-primary mb-2 drop-shadow-sm tracking-wide">
+    <div className="flex justify-center px-4">
+      <div className="card card-border bg-base-300 w-full max-w-sm sm:w-96">
+        <div className="card-body p-4 sm:p-6">
+          <div className="flex flex-col items-center mb-4 sm:mb-6">
+            <h2 className="card-title text-2xl sm:text-3xl font-bold text-center text-primary mb-2 drop-shadow-sm tracking-wide">
               {isLogin ? "Welcome Back!" : "Create Your Account"}
             </h2>
-            <p className="text-gray-500 text-center text-sm">
+            <p className="text-gray-500 text-center text-xs sm:text-sm">
               {isLogin ? "Please login to continue" : "Sign up to get started"}
             </p>
           </div>
@@ -77,61 +77,69 @@ const Login = () => {
             <fieldset className="fieldset">
               {!isLogin && (
                 <>
-                  <legend className="fieldset-legend">First Name</legend>
+                  <legend className="fieldset-legend text-sm">
+                    First Name
+                  </legend>
                   <input
                     type="text"
-                    className="input focus:outline-none"
+                    className="input focus:outline-none text-sm"
                     placeholder="First Name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
-                  <legend className="fieldset-legend">Last Name</legend>
+                  <legend className="fieldset-legend text-sm">Last Name</legend>
                   <input
                     type="text"
-                    className="input focus:outline-none"
+                    className="input focus:outline-none text-sm"
                     placeholder="Last Name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                   />
                 </>
               )}
-              <legend className="fieldset-legend">Email</legend>
+              <legend className="fieldset-legend text-sm">Email</legend>
               <input
                 type="email"
-                className="input focus:outline-none"
+                className="input focus:outline-none text-sm"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <legend className="fieldset-legend">Password</legend>
+              <legend className="fieldset-legend text-sm">Password</legend>
               <input
                 type="password"
-                className="input focus:outline-none"
+                className="input focus:outline-none text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </fieldset>
           </div>
-          <p className="text-red-500 text-center">{errMessage}</p>
+          <p className="text-red-500 text-center text-xs sm:text-sm">
+            {errMessage}
+          </p>
           <div className="card-actions justify-center">
             <button
-              className="btn btn-primary w-full mt-2"
+              className="btn btn-primary w-full mt-2 text-sm sm:text-base"
               onClick={isLogin ? handleLogin : handleSignUp}
               disabled={isLoading}
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <span className="loading loading-spinner loading-sm"></span>
-                  {isLogin ? "Logging in..." : "Creating account..."}
+                  <span className="text-xs sm:text-sm">
+                    {isLogin ? "Logging in..." : "Creating account..."}
+                  </span>
                 </div>
+              ) : isLogin ? (
+                "Login"
               ) : (
-                isLogin ? "Login" : "Sign Up"
+                "Sign Up"
               )}
             </button>
           </div>
           <p
-            className="cursor-pointer text-blue-600 hover:underline mt-4 text-center font-medium transition-colors duration-200"
+            className="cursor-pointer text-blue-600 hover:underline mt-4 text-center font-medium transition-colors duration-200 text-xs sm:text-sm"
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin ? "New User? Sign Up Here" : "Existing User? Login"}

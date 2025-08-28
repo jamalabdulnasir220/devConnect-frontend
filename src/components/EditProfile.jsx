@@ -41,69 +41,100 @@ const EditProfile = ({ user }) => {
   };
 
   return (
-    <div className="flex justify-center gap-5 overflow-y-auto my-5">
-      <div className="max-h-[73vh] overflow-auto">
-        <div className="card card-border bg-base-300 w-96">
+    <div className="flex flex-col lg:flex-row justify-center gap-5 overflow-y-auto px-4">
+      <div className="w-full lg:max-w-md max-h-[70vh] overflow-auto">
+        <div className="card card-border bg-base-300 w-full">
           <div className="card-body">
-            <h2 className="card-title flex justify-center">Edit Profile</h2>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">First Name</legend>
-                <input
-                  type="text"
-                  className="input focus:outline-none focus:border-none"
-                  placeholder="first name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-                <legend className="fieldset-legend">Last Name</legend>
-                <input
-                  type="text"
-                  className="input focus:outline-none focus:border-none"
-                  placeholder="last name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-                <legend className="fieldset-legend">Age</legend>
-                <input
-                  type="number"
-                  className="input focus:outline-none focus:border-none"
-                  placeholder="age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                />
-                <legend className="fieldset-legend">Gender</legend>
-                <select
-                  className="input focus:outline-none focus:border-none"
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="others">Others</option>
-                </select>
-                <legend className="fieldset-legend">About</legend>
-                <textarea
-                  className="textarea focus:outline-none focus:border-none"
-                  placeholder="about"
-                  value={about}
-                  onChange={(e) => setAbout(e.target.value)}
-                  rows="3"
-                />
-                <legend className="fieldset-legend">Photo</legend>
-                <input
-                  type="text"
-                  className="input focus:outline-none focus:border-none"
-                  placeholder="photo"
-                  value={photo}
-                  onChange={(e) => setPhoto(e.target.value)}
-                />
+            <h2 className="card-title flex justify-center text-lg lg:text-xl">
+              Edit Profile
+            </h2>
+            <div className="flex-1 overflow-y-auto">
+              <fieldset className="fieldset space-y-2">
+                <div>
+                  <legend className="fieldset-legend text-sm lg:text-base">
+                    First Name
+                  </legend>
+                  <input
+                    type="text"
+                    className="input focus:outline-none focus:border-none text-sm lg:text-base w-full"
+                    placeholder="first name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <legend className="fieldset-legend text-sm lg:text-base">
+                    Last Name
+                  </legend>
+                  <input
+                    type="text"
+                    className="input focus:outline-none focus:border-none text-sm lg:text-base w-full"
+                    placeholder="last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <legend className="fieldset-legend text-sm lg:text-base">
+                    Age
+                  </legend>
+                  <input
+                    type="number"
+                    className="input focus:outline-none focus:border-none text-sm lg:text-base w-full"
+                    placeholder="age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <legend className="fieldset-legend text-sm lg:text-base">
+                    Gender
+                  </legend>
+                  <select
+                    className="input focus:outline-none focus:border-none text-sm lg:text-base w-full"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="others">Others</option>
+                  </select>
+                </div>
+                <div>
+                  <legend className="fieldset-legend text-sm lg:text-base">
+                    About
+                  </legend>
+                  <textarea
+                    className="textarea focus:outline-none focus:border-none text-sm lg:text-base w-full"
+                    placeholder="about"
+                    value={about}
+                    onChange={(e) => setAbout(e.target.value)}
+                    rows="1"
+                  />
+                </div>
+                <div>
+                  <legend className="fieldset-legend text-sm lg:text-base">
+                    Photo
+                  </legend>
+                  <input
+                    type="text"
+                    className="input focus:outline-none focus:border-none text-sm lg:text-base w-full"
+                    placeholder="photo"
+                    value={photo}
+                    onChange={(e) => setPhoto(e.target.value)}
+                  />
+                </div>
               </fieldset>
             </div>
-            {errMessage && <p className="text-red-500">{errMessage}</p>}
-            <div className="card-actions justify-center">
-              <button className="btn btn-primary" onClick={saveProfile}>
+            {errMessage && (
+              <p className="text-red-500 text-sm lg:text-base">{errMessage}</p>
+            )}
+            <div className="card-actions justify-center mt-4">
+              <button
+                className="btn btn-primary text-sm lg:text-base"
+                onClick={saveProfile}
+              >
                 Save Profile
               </button>
             </div>

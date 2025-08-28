@@ -30,16 +30,16 @@ const Feed = () => {
 
   if (!feed || feed?.length === 0)
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <img
           src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
           alt="No feed"
-          className="w-40 h-40 mb-6 opacity-70"
+          className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 sm:mb-6 opacity-70"
         />
-        <h1 className="text-2xl font-bold text-gray-700 mb-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-700 mb-2 text-center">
           No Feed Available
         </h1>
-        <p className="text-gray-500 mb-4">
+        <p className="text-sm sm:text-base text-gray-500 mb-4 text-center max-w-md">
           There are currently no new users to show in your feed. Check back
           later or update your profile to get better matches!
         </p>
@@ -47,7 +47,7 @@ const Feed = () => {
     );
 
   return (
-    <div className="max-h-full flex justify-center mt-20">
+    <div className="">
       <UserCard user={feed[0]} />
     </div>
   );

@@ -48,64 +48,86 @@ const Request = () => {
 
   if (!requests || requests?.length === 0)
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <img
           src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
           alt="No requests"
-          className="w-40 h-40 mb-6 opacity-70"
+          className="w-32 h-32 md:w-40 md:h-40 mb-6 opacity-70"
         />
-        <h1 className="text-2xl font-bold text-gray-700 mb-2">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-700 mb-2 text-center">
           No Requests Found
         </h1>
-        <p className="text-gray-500 mb-4">
+        <p className="text-gray-500 mb-4 text-center max-w-md">
           You have no new connection requests at the moment. Check back later or
           explore to connect with more people!
         </p>
       </div>
     );
   return (
-    <div className="text-center my-10">
-      <h1 className="font-bold text-3xl">Connection Request</h1>
-      <div className="flex justify-center gap-5 my-10 flex-wrap">
-        {requests?.map((request) => (
-          <div
-            key={request?.fromUserId?.firstName}
-            className="flex flex-col w-1/5 items-center justify-between rounded-3xl shadow-2xl bg-gray-900 p-5 hover:opacity-75 gap-5"
-          >
-            <div className="">
-              <img
-                src={request?.fromUserId?.photo}
-                alt="photo"
-                className="w-60 h-60 rounded-full object-cover"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-800 mb-2">
+            Connection Requests
+          </h1>
+          <p className="text-gray-600 text-sm md:text-base">
+            You have {requests?.length} pending request{requests?.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {requests?.map((request) => (
+            <div
+              key={request?.fromUserId?.firstName}
+              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+            >
+              {/* Profile Image */}
+              <div className="relative">
+                <img
+                  src={request?.fromUserId?.photo}
+                  alt={`${request?.fromUserId?.firstName} ${request?.fromUserId?.lastName}`}
+                  className="w-full h-48 md:h-56 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+              
+              {/* Profile Info */}
+              <div className="p-6">
+                <div className="text-center mb-4">
+                  <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-1">
+                    {request?.fromUserId?.firstName} {request?.fromUserId?.lastName}
+                  </h2>
+                  {request?.fromUserId?.age && request?.fromUserId?.gender && (
+                    <p className="text-sm text-gray-600 mb-2">
+                      {request?.fromUserId?.age} years old • {request?.fromUserId?.gender}
+                    </p>
+                  )}
+                  {request?.fromUserId?.about && (
+                    <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                      {request?.fromUserId?.about}
+                    </p>
+                  )}
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 text-sm md:text-base"
+                    onClick={() => reviewRequest("Rejected", request?._id)}
+                  >
+                    Decline
+                  </button>
+                  <button
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 text-sm md:text-base"
+                    onClick={() => reviewRequest("Accepted", request?._id)}
+                  >
+                    Accept
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="">
-              <h2>
-                {request?.fromUserId?.firstName} {request?.fromUserId?.lastName}
-              </h2>
-              {request?.fromUserId?.age && request?.fromUserId?.gender && (
-                <p>
-                  {request?.fromUserId?.age}, {request?.fromUserId?.gender}
-                </p>
-              )}
-              <p>{request?.fromUserId?.about}</p>
-            </div>
-            <div className="flex justify-between gap-5 items-center">
-              <button
-                className="btn btn-primary"
-                onClick={() => reviewRequest("Rejected", request?._id)}
-              >
-                Reject
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => reviewRequest("Accepted", request?._id)}
-              >
-                Accept
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
