@@ -14,15 +14,65 @@ const EditProfile = ({ user }) => {
   const [gender, setGender] = React.useState(user?.gender);
   const [about, setAbout] = React.useState(user?.about);
   const [photo, setPhoto] = React.useState(user?.photo);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(user?.photo || "");
   const [errMessage, setErrMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [message, setMessage] = useState("");
 
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setErrMessage("Please select a valid image file");
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrMessage("Image size should be less than 5MB");
+        return;
+      }
+
+      setSelectedFile(file);
+      setErrMessage("");
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const saveProfile = async () => {
     try {
+      let photoUrl = photo;
+      
+      // If a new file is selected, upload it first
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('photo', selectedFile);
+        
+        const uploadRes = await axios.post(
+          BASE_URL + "/upload/photo",
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        
+        photoUrl = uploadRes?.data?.photoUrl;
+      }
+
       const res = await axios.post(
         BASE_URL + "/profile/edit",
-        { firstName, lastName, age, gender, photo, about },
+        { firstName, lastName, age, gender, photo: photoUrl, about },
         {
           withCredentials: true,
         }
@@ -117,13 +167,23 @@ const EditProfile = ({ user }) => {
                   <legend className="fieldset-legend text-sm lg:text-base">
                     Photo
                   </legend>
-                  <input
-                    type="text"
-                    className="input focus:outline-none focus:border-none text-sm lg:text-base w-full"
-                    placeholder="photo"
-                    value={photo}
-                    onChange={(e) => setPhoto(e.target.value)}
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="file-input file-input-bordered w-full text-sm lg:text-base"
+                      onChange={handleFileSelect}
+                    />
+                    {previewUrl && (
+                      <div className="mt-2">
+                        <img
+                          src={previewUrl}
+                          alt="Profile preview"
+                          className="w-24 h-24 object-cover rounded-lg border"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </fieldset>
             </div>
@@ -143,7 +203,7 @@ const EditProfile = ({ user }) => {
       </div>
 
       <div className="">
-        <UserCard user={{ firstName, lastName, photo, age, gender, about }} />
+        <UserCard user={{ firstName, lastName, photo: previewUrl, age, gender, about }} />
       </div>
 
       {showToast && <Toast message={message} />}
