@@ -6,6 +6,7 @@ import Feed from "./components/Feed";
 import Connections from "./components/Connections";
 import Request from "./components/Request";
 import Premium from "./components/Premium";
+import Chat from "./components/Chat";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/connections" element={<Connections />} />
         <Route path="/request" element={<Request />} />
         <Route path="/premium" element={<Premium />} />
+        <Route path="/chat/:targetUserId" element={<Chat />} />
       </Route>
       {/* <Route path="/login" element={<div>Login Page</div>} />
       <Route path="/test" element={<div>Test Page</div>} /> */}
