@@ -6,18 +6,25 @@ import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser, userAdded } from "../api/userSlice";
 import { useEffect } from "react";
+import { feedAdded } from "../api/feedSlice";
 
 const Body = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const userData = useSelector(selectUser);
+  const fetchFeed = async () => {
+    try {
+      const res = await axios.get(BASE_URL + "/user/feed", {
+        withCredentials: true,
+      });
+
+      dispatch(feedAdded(res?.data?.feedUsers));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const fetchUsers = async () => {
-    if (!userData) {
-      navigate("/login");
-      return;
-    }
     try {
       const res = await axios.get(BASE_URL + "/profile/view", {
         withCredentials: true,
@@ -34,12 +41,13 @@ const Body = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchFeed()
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 px-4 py-4 max-w-7xl mx-auto w-full ">
+      <main className="flex-1 px-4 py-4 mx-auto w-full">
         <Outlet />
       </main>
       {/* <Footer /> */}

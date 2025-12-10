@@ -1,15 +1,22 @@
+import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
-import React, { useState, useRef, useEffect } from "react";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { feedRemoved } from "../api/feedSlice";
 
-const UserCard = ({ user }) => {
+// Improved responsive swipe card with pointer events, keyboard support, nicer UI
+export default function UserCard({ user }) {
   const dispatch = useDispatch();
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
+
+  // drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const [start, setStart] = useState({ x: 0, y: 0 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [animatingOut, setAnimatingOut] = useState(false);
+
+  const SWIPE_THRESHOLD = 110; // pixels
+  const OUT_DISTANCE = 800; // px to animate off-screen
 
   const handleSendRequest = async (status, userId) => {
     try {
@@ -18,209 +25,204 @@ const UserCard = ({ user }) => {
         {},
         { withCredentials: true }
       );
-      console.log(res?.data?.savedRequest);
+      // Optionally use res?.data
       dispatch(feedRemoved(userId));
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.error("send request error", err);
     }
   };
 
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    setStartPos({ x: touch.clientX, y: touch.clientY });
+  // Pointer events unify mouse & touch
+  const onPointerDown = (e) => {
+    if (animatingOut) return;
+    const point = e.nativeEvent;
+    setStart({ x: point.clientX, y: point.clientY });
     setIsDragging(true);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isDragging) return;
-
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - startPos.x;
-    const deltaY = touch.clientY - startPos.y;
-
-    setDragOffset({ x: deltaX, y: deltaY });
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return;
-
-    setIsDragging(false);
-
-    // Determine swipe direction and threshold
-    const swipeThreshold = 100;
-
-    if (Math.abs(dragOffset.x) > swipeThreshold) {
-      if (dragOffset.x > 0) {
-        // Swipe right - Interested
-        handleSendRequest("Interested", user._id);
-      } else {
-        // Swipe left - Ignore
-        handleSendRequest("Ignored", user._id);
-      }
+    // capture the pointer so we still receive move/up even if pointer leaves
+    try {
+      e.target.setPointerCapture(e.nativeEvent.pointerId);
+    } catch (e) {
+      /* ignore */
     }
-
-    // Reset position
-    setDragOffset({ x: 0, y: 0 });
   };
 
-  const handleMouseDown = (e) => {
-    setStartPos({ x: e.clientX, y: e.clientY });
-    setIsDragging(true);
-  };
-
-  const handleMouseMove = (e) => {
+  const onPointerMove = (e) => {
     if (!isDragging) return;
-
-    const deltaX = e.clientX - startPos.x;
-    const deltaY = e.clientY - startPos.y;
-
-    setDragOffset({ x: deltaX, y: deltaY });
+    const point = e.nativeEvent;
+    const dx = point.clientX - start.x;
+    const dy = point.clientY - start.y;
+    setOffset({ x: dx, y: dy });
   };
 
-  const handleMouseUp = () => {
-    if (!isDragging) return;
-
-    setIsDragging(false);
-
-    // Determine swipe direction and threshold
-    const swipeThreshold = 100;
-
-    if (Math.abs(dragOffset.x) > swipeThreshold) {
-      if (dragOffset.x > 0) {
-        // Swipe right - Interested
-        handleSendRequest("Interested", user._id);
-      } else {
-        // Swipe left - Ignore
-        handleSendRequest("Ignored", user._id);
-      }
+  const finishDrag = (finalOffsetX) => {
+    // Determine action
+    if (Math.abs(finalOffsetX) > SWIPE_THRESHOLD) {
+      const isRight = finalOffsetX > 0;
+      // animate out
+      setAnimatingOut(true);
+      setOffset({ x: isRight ? OUT_DISTANCE : -OUT_DISTANCE, y: offset.y });
+      // after animation completes, call server and remove from feed
+      setTimeout(() => {
+        handleSendRequest(isRight ? "Interested" : "Ignored", user._id);
+      }, 300);
+    } else {
+      // snap back
+      setOffset({ x: 0, y: 0 });
     }
-
-    // Reset position
-    setDragOffset({ x: 0, y: 0 });
   };
 
+  const onPointerUp = (e) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    finishDrag(offset.x);
+    try {
+      e.target.releasePointerCapture(e.nativeEvent.pointerId);
+    } catch (err) {
+      /* ignore */
+    }
+  };
+
+  // Keyboard support: left -> pass, right -> like
   useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false);
-        setDragOffset({ x: 0, y: 0 });
+    const handleKey = (ev) => {
+      if (animatingOut) return;
+      if (ev.key === "ArrowLeft") {
+        // animate left and call
+        setAnimatingOut(true);
+        setOffset({ x: -OUT_DISTANCE, y: 0 });
+        setTimeout(() => handleSendRequest("Ignored", user._id), 300);
+      } else if (ev.key === "ArrowRight") {
+        setAnimatingOut(true);
+        setOffset({ x: OUT_DISTANCE, y: 0 });
+        setTimeout(() => handleSendRequest("Interested", user._id), 300);
       }
     };
 
-    document.addEventListener("mouseup", handleGlobalMouseUp);
-    return () => document.removeEventListener("mouseup", handleGlobalMouseUp);
-  }, [isDragging]);
+    // make the card focusable and listen globally so users can use keyboard
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [animatingOut, user?._id]);
+
+  // If the card's user prop changes (new card), reset states
+  useEffect(() => {
+    setIsDragging(false);
+    setOffset({ x: 0, y: 0 });
+    setAnimatingOut(false);
+  }, [user?._id]);
+
+  // Transform styles
+  const rotation = offset.x * 0.06; // subtle rotate
+  const scale = isDragging ? 1.02 : 1;
+  const opacity = Math.max(0.85, 1 - Math.abs(offset.x) / 1200);
 
   const cardStyle = {
-    transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${
-      dragOffset.x * 0.1
-    }deg)`,
-    transition: isDragging ? "none" : "transform 0.3s ease-out",
+    transform: `translate(${offset.x}px, ${offset.y}px) rotate(${rotation}deg) scale(${scale})`,
+    transition: animatingOut ? "transform 0.3s ease-out" : isDragging ? "none" : "transform 0.25s cubic-bezier(.2,.9,.3,1)",
     cursor: isDragging ? "grabbing" : "grab",
-    zIndex: isDragging ? 10 : 1,
+    opacity,
   };
 
-  const getSwipeIndicator = () => {
-    if (Math.abs(dragOffset.x) < 50) return null;
-
-    const isRightSwipe = dragOffset.x > 0;
-    const opacity = Math.min(Math.abs(dragOffset.x) / 200, 1);
-
-    return (
-      <div
-        className={`absolute inset-0 flex items-center justify-center text-4xl font-bold rounded-3xl ${
-          isRightSwipe
-            ? "bg-gradient-to-br from-green-400 to-green-600 text-white"
-            : "bg-gradient-to-br from-red-400 to-red-600 text-white"
-        }`}
-        style={{ opacity }}
-      >
-        <div className="text-center">
-          <div className="text-6xl mb-2">{isRightSwipe ? "❤️" : "❌"}</div>
-          <div className="text-xl font-semibold">
-            {isRightSwipe ? "Interested!" : "Pass"}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // Indicator
+  const indicatorVisible = Math.abs(offset.x) > 30;
+  const isRight = offset.x > 0;
+  const indicatorProgress = Math.min(Math.abs(offset.x) / SWIPE_THRESHOLD, 1);
 
   return (
-    <div className="relative w-full max-w-sm mx-auto max-h-[70vh]">
-      {getSwipeIndicator()}
+    <div className="flex items-center justify-center w-full p-3 sm:p-6">
       <div
         ref={cardRef}
-        className="bg-white w-full max-w-[280px] sm:max-w-[300px] md:max-w-[360px] lg:max-w-[400px] h-[420px] sm:h-[420px] md:h-[460px] lg:h-[500px] shadow-2xl rounded-3xl flex flex-col overflow-hidden border-0 relative mx-auto"
+        tabIndex={0}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          setIsDragging(false);
+          finishDrag(offset.x);
+        }}
+        className="relative w-full max-w-sm sm:max-w-md md:max-w-sm lg:max-w-md rounded-3xl shadow-xl bg-white overflow-hidden"
         style={cardStyle}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
       >
-        {/* Profile Image with Gradient Overlay */}
-        <div className="relative h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden">
+        {/* Image header */}
+        <div className="relative h-64 sm:h-72 md:h-80 lg:h-96 w-full">
           <img
             src={user?.photo}
-            alt={`${user?.firstName} ${user?.lastName}`}
+            alt={`${user?.firstName || ""} ${user?.lastName || ""}`}
             className="w-full h-full object-cover"
+            draggable={false}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-          {/* User Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-6 text-white">
-            <h2 className="text-xl sm:text-xl md:text-xl lg:text-2xl font-bold mb-1">
+          {/* Top-left small badge: age/gender */}
+          <div className="absolute left-4 top-4 bg-black/40 backdrop-blur-md text-white px-3 py-1 rounded-full text-sm font-medium">
+            {user?.age ? `${user.age}` : "—"}
+            {user?.gender ? ` • ${user.gender}` : ""}
+          </div>
+
+          {/* Name */}
+          <div className="absolute left-4 bottom-4 text-white">
+            <h3 className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight">
               {user?.firstName} {user?.lastName}
-            </h2>
-            {user?.age && user?.gender && (
-              <p className="text-base sm:text-lg md:text-xl opacity-90">
-                {user.age} • {user.gender}
-              </p>
+            </h3>
+            {user?.location && (
+              <p className="text-sm opacity-90">{user.location}</p>
             )}
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="flex-1 p-4 sm:p-5 md:p-6 flex flex-col">
-          {/* About Section */}
+        {/* Body */}
+        <div className="p-4 sm:p-5 md:p-6 flex flex-col gap-4 bg-white">
           <div className="flex-1">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
-              About
-            </h3>
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">
-              {user?.about || "No description available"}
+            <h4 className="text-sm sm:text-base font-semibold text-gray-700">About</h4>
+            <p className="mt-2 text-gray-600 text-sm sm:text-base leading-relaxed">
+              {user?.about || "No description available."}
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="mt-4 sm:mt-5 md:mt-6 space-y-2 sm:space-y-3">
-            <div className="flex gap-2 sm:gap-3">
-              <button
-                className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-4 sm:px-5 md:px-6 rounded-2xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                onClick={() => handleSendRequest("Ignored", user._id)}
-              >
-                <span className="text-base sm:text-lg mr-1.5 sm:mr-2">✕</span>
-                Pass
-              </button>
-              <button
-                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-4 sm:px-5 md:px-6 rounded-2xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                onClick={() => handleSendRequest("Interested", user._id)}
-              >
-                <span className="text-base sm:text-lg mr-1.5 sm:mr-2">❤️</span>
-                Like
-              </button>
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setAnimatingOut(true);
+                setOffset({ x: -OUT_DISTANCE, y: 0 });
+                setTimeout(() => handleSendRequest("Ignored", user._id), 300);
+              }}
+              className="flex-1 py-2.5 rounded-2xl text-sm sm:text-base font-semibold shadow-md bg-gradient-to-r from-red-500 to-red-600 text-white hover:scale-105 active:scale-95"
+            >
+              <span className="mr-2">✕</span> Pass
+            </button>
 
-            {/* Swipe Hint */}
-            <p className="text-center text-gray-400 text-xs sm:text-sm mt-1 sm:mt-2">
-              Swipe left to pass, right to like
-            </p>
+            <button
+              onClick={() => {
+                setAnimatingOut(true);
+                setOffset({ x: OUT_DISTANCE, y: 0 });
+                setTimeout(() => handleSendRequest("Interested", user._id), 300);
+              }}
+              className="flex-1 py-2.5 rounded-2xl text-sm sm:text-base font-semibold shadow-md bg-gradient-to-r from-green-500 to-green-600 text-white hover:scale-105 active:scale-95"
+            >
+              <span className="mr-2">❤️</span> Like
+            </button>
           </div>
+
+          <p className="text-center text-xs sm:text-sm text-gray-400">Swipe left to pass, right to like — or use ← / → keys</p>
         </div>
+
+        {/* Swipe indicator overlay */}
+        {indicatorVisible && (
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute inset-0 flex items-center justify-center rounded-3xl transition-opacity duration-150`}
+            style={{ opacity: Math.min(0.95, indicatorProgress * 1.2) }}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="text-6xl select-none">{isRight ? "❤️" : "❌"}</div>
+              <div className="mt-2 text-lg font-bold text-white">
+                {isRight ? "Interested" : "Pass"}
+              </div>
+              <div className="mt-1 text-xs text-white/90">{Math.round(indicatorProgress * 100)}%</div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-};
+}
 
-export default UserCard;

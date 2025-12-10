@@ -31,7 +31,8 @@ const Login = () => {
       dispatch(userAdded(result?.data?.user));
       navigate("/");
     } catch (error) {
-      setErrMessage(error?.response?.data);
+      setErrMessage(error?.response?.data?.message);
+      console.log(error)
     } finally {
       setIsLoading(false);
     }

@@ -13,6 +13,7 @@ const Feed = () => {
 
   const fetchFeed = async () => {
     if (!userData) return;
+    if (feed) return;
     try {
       const res = await axios.get(BASE_URL + "/user/feed", {
         withCredentials: true,
@@ -46,11 +47,7 @@ const Feed = () => {
       </div>
     );
 
-  return (
-    <div className="">
-      <UserCard user={feed[0]} />
-    </div>
-  );
+  return <UserCard user={feed[0]} />;
 };
 
 export default Feed;
