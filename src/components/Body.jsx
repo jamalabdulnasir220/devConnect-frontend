@@ -3,8 +3,8 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import axios from "axios";
 import { BASE_URL } from "../utils/constants";
-import { useDispatch, useSelector } from "react-redux";
-import { selectUser, userAdded } from "../api/userSlice";
+import { useDispatch } from "react-redux";
+import { userAdded } from "../api/userSlice";
 import { useEffect } from "react";
 import { feedAdded } from "../api/feedSlice";
 

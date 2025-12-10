@@ -6,7 +6,6 @@ import { userAdded } from "../api/userSlice";
 import UserCard from "./UserCard";
 import Toast from "./Toast";
 
-
 const EditProfile = ({ user: initialUser }) => {
   const dispatch = useDispatch();
   // Use initialUser props to seed form
@@ -103,10 +102,14 @@ const EditProfile = ({ user: initialUser }) => {
         const formData = new FormData();
         formData.append("photo", selectedFile);
 
-        const uploadRes = await axios.post(BASE_URL + "/upload/photo", formData, {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const uploadRes = await axios.post(
+          BASE_URL + "/upload/photo",
+          formData,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
 
         photoUrl = uploadRes?.data?.photoUrl || photoUrl;
       }
@@ -117,14 +120,28 @@ const EditProfile = ({ user: initialUser }) => {
         { withCredentials: true }
       );
 
-      dispatch(userAdded(res?.data?.data || { ...initialUser, firstName, lastName, age, gender, about, photo: photoUrl }));
+      dispatch(
+        userAdded(
+          res?.data?.data || {
+            ...initialUser,
+            firstName,
+            lastName,
+            age,
+            gender,
+            about,
+            photo: photoUrl,
+          }
+        )
+      );
       setMessage(res?.data?.message || "Profile updated");
       setErrMessage("");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
       console.error("saveProfile error", error);
-      setErrMessage(error?.response?.data?.message || "Failed to save profile. Try again.");
+      setErrMessage(
+        error?.response?.data?.message || "Failed to save profile. Try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -137,10 +154,23 @@ const EditProfile = ({ user: initialUser }) => {
         <div className="order-1 lg:order-1">
           <div className="sticky top-6">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Live Preview</h3>
-              <UserCard user={{ firstName, lastName, photo: previewUrl || photo, age, gender, about }} />
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Live Preview
+              </h3>
+              <UserCard
+                user={{
+                  firstName,
+                  lastName,
+                  photo: previewUrl || photo,
+                  age,
+                  gender,
+                  about,
+                }}
+              />
 
-              <div className="mt-4 text-center text-sm text-gray-500">This preview updates as you change the form.</div>
+              <div className="mt-4 text-center text-sm text-gray-500">
+                This preview updates as you change the form.
+              </div>
             </div>
           </div>
         </div>
@@ -148,7 +178,9 @@ const EditProfile = ({ user: initialUser }) => {
         {/* Right: Form */}
         <div className="order-2 lg:order-2">
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Edit Profile</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Edit Profile
+            </h2>
 
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -158,7 +190,7 @@ const EditProfile = ({ user: initialUser }) => {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
+                    className="mt-1 block w-full rounded-lg p-2 border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
                     placeholder="First name"
                   />
                 </label>
@@ -169,7 +201,7 @@ const EditProfile = ({ user: initialUser }) => {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
+                    className="mt-1 block w-full rounded-lg p-2 border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
                     placeholder="Last name"
                   />
                 </label>
@@ -182,7 +214,7 @@ const EditProfile = ({ user: initialUser }) => {
                     type="number"
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
+                    className="mt-1 block w-full rounded-lg p-2 border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
                     placeholder="Age"
                   />
                 </label>
@@ -192,7 +224,7 @@ const EditProfile = ({ user: initialUser }) => {
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
+                    className="mt-1 block w-full rounded-lg p-2 border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
                   >
                     <option value="">Prefer not to say</option>
                     <option value="male">Male</option>
@@ -210,7 +242,7 @@ const EditProfile = ({ user: initialUser }) => {
                   value={about}
                   onChange={(e) => setAbout(e.target.value)}
                   rows={4}
-                  className="mt-1 block w-full rounded-lg border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
+                  className="mt-1 block w-full rounded-lg p-2 border-gray-200 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-200"
                   placeholder="Tell something about yourself"
                 />
               </label>
@@ -223,7 +255,11 @@ const EditProfile = ({ user: initialUser }) => {
                 >
                   <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                     {previewUrl ? (
-                      <img src={previewUrl} alt="preview" className="w-full h-full object-cover" />
+                      <img
+                        src={previewUrl}
+                        alt="preview"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="text-gray-400 text-xs">No photo</div>
                     )}
@@ -260,12 +296,16 @@ const EditProfile = ({ user: initialUser }) => {
                       />
                     </div>
 
-                    <p className="mt-2 text-sm text-gray-500">Drag & drop an image here, or click Upload. Max 5MB.</p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Drag & drop an image here, or click Upload. Max 5MB.
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {errMessage && <div className="text-sm text-red-600">{errMessage}</div>}
+              {errMessage && (
+                <div className="text-sm text-red-600">{errMessage}</div>
+              )}
 
               <div className="flex gap-3 justify-end">
                 <button
@@ -303,6 +343,4 @@ const EditProfile = ({ user: initialUser }) => {
   );
 };
 
-export default EditProfile
-
-
+export default EditProfile;
