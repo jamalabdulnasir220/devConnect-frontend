@@ -20,7 +20,7 @@ const Body = () => {
 
       dispatch(feedAdded(res?.data?.feedUsers));
     } catch (error) {
-      console.error(error);
+      console.error("Fetch", error);
     }
   };
 
@@ -35,13 +35,12 @@ const Body = () => {
         navigate("/login");
         return;
       }
-      console.error(error);
     }
   };
 
   useEffect(() => {
     fetchUsers();
-    fetchFeed()
+    fetchFeed();
   }, []);
 
   return (
