@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser, userRemoved } from "../api/userSlice";
+import { feedAdded } from "../api/feedSlice";
 import { Link, useNavigate } from "react-router";
 import axios from "axios";
 import { BASE_URL } from "../utils/constants";
@@ -21,6 +22,7 @@ const Navbar = () => {
         }
       );
       dispatch(userRemoved());
+      dispatch(feedAdded(null));
       navigate("/login");
     } catch (error) {
       console.error(error);

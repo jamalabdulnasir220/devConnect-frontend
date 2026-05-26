@@ -7,18 +7,21 @@ import Connections from "./components/Connections";
 import Request from "./components/Request";
 import Premium from "./components/Premium";
 import Chat from "./components/Chat";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Body />}>
-        <Route index element={<Feed />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/connections" element={<Connections />} />
-        <Route path="/request" element={<Request />} />
-        <Route path="/premium" element={<Premium />} />
-        <Route path="/chat/:targetUserId" element={<Chat />} />
+        <Route element={<ProtectedRoute />}>
+          <Route index element={<Feed />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/request" element={<Request />} />
+          <Route path="/premium" element={<Premium />} />
+          <Route path="/chat/:targetUserId" element={<Chat />} />
+        </Route>
       </Route>
       {/* <Route path="/login" element={<div>Login Page</div>} />
       <Route path="/test" element={<div>Test Page</div>} /> */}

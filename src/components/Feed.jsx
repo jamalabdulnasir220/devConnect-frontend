@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { feedAdded, selectFeed } from "../api/feedSlice";
 import axios from "axios";
@@ -10,24 +10,35 @@ const Feed = () => {
   const dispatch = useDispatch();
   const feed = useSelector(selectFeed);
   const userData = useSelector(selectUser);
-
-  const fetchFeed = async () => {
-    if (!userData) return;
-    if (feed) return;
-    try {
-      const res = await axios.get(BASE_URL + "/user/feed", {
-        withCredentials: true,
-      });
-
-      dispatch(feedAdded(res?.data?.feedUsers));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (!userData || feed) return;
+
+    const fetchFeed = async () => {
+      setIsLoading(true);
+      try {
+        const res = await axios.get(BASE_URL + "/user/feed", {
+          withCredentials: true,
+        });
+        dispatch(feedAdded(res?.data?.feedUsers));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchFeed();
-  }, []);
+  }, [userData, feed, dispatch]);
+
+  if (!userData || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <span className="loading loading-spinner loading-lg text-primary" />
+      </div>
+    );
+  }
 
   if (!feed || feed?.length === 0)
     return (

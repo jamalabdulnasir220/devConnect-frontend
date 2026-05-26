@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { userAdded } from "../api/userSlice";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { BASE_URL } from "../utils/constants";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || "/";
   const dispatch = useDispatch();
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
@@ -29,7 +31,7 @@ const Login = () => {
         { withCredentials: true }
       );
       dispatch(userAdded(result?.data?.user));
-      navigate("/");
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       setErrMessage(error?.response?.data?.message);
       console.log(error)
