@@ -112,7 +112,7 @@ const Login = () => {
                   <input
                     type="text"
                     className="input input-bordered w-full"
-                    placeholder="Jane"
+                    placeholder="Jamal"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
@@ -122,7 +122,7 @@ const Login = () => {
                   <input
                     type="text"
                     className="input input-bordered w-full"
-                    placeholder="Doe"
+                    placeholder="Nasir"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                   />
@@ -134,7 +134,7 @@ const Login = () => {
               <input
                 type="email"
                 className="input input-bordered w-full"
-                placeholder="you@example.com"
+                placeholder="jamal@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
