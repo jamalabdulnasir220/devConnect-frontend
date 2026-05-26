@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "react-router";
+import { useLocation, useParams, Link } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { createSocketConnection } from "../utils/socket";
 import { useSelector } from "react-redux";
@@ -13,6 +13,13 @@ const Chat = () => {
   const user = useSelector(selectUser);
   const userId = user?._id;
 
+  const partnerName = [
+    location?.state?.firstName,
+    location?.state?.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -24,11 +31,10 @@ const Chat = () => {
   useEffect(() => {
     if (!userId) return;
     const socket = createSocketConnection();
-    // As soon as the page loads, join the chat
     socket.emit("joinChat", { userId, targetUserId });
 
     socket.on("messageReceived", ({ firstName, text }) => {
-      setMessages((messages) => [...messages, { firstName, text }]);
+      setMessages((prev) => [...prev, { firstName, text }]);
     });
 
     return () => {
@@ -37,24 +43,15 @@ const Chat = () => {
   }, [userId, targetUserId]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      //   const message = {
-      //     id: Date.now(),
-      //     text: newMessage,
-      //     sender: "currentUser", // In a real app, this would be the logged-in user's ID
-      //     timestamp: new Date().toLocaleTimeString(),
-      //   };
-      //   setMessages([...messages, message]);
-      //   setNewMessage("");
-      const socket = createSocketConnection();
-      socket.emit("sendMessage", {
-        firstName: user?.firstName,
-        userId,
-        targetUserId,
-        text: newMessage,
-      });
-      setNewMessage("");
-    }
+    if (!newMessage.trim()) return;
+    const socket = createSocketConnection();
+    socket.emit("sendMessage", {
+      firstName: user?.firstName,
+      userId,
+      targetUserId,
+      text: newMessage,
+    });
+    setNewMessage("");
   };
 
   const handleKeyPress = (e) => {
@@ -65,81 +62,77 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Chat Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-            {location?.state?.firstName?.charAt(0)?.toUpperCase() || "U"}
+    <div className="flex flex-col flex-1 min-h-0 page-card overflow-hidden shadow-md">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-base-300 bg-base-100 shrink-0">
+        <Link
+          to="/connections"
+          className="btn btn-ghost btn-sm btn-circle"
+          aria-label="Back to connections"
+        >
+          <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </Link>
+        <div className="avatar placeholder">
+          <div className="bg-primary text-primary-content rounded-full w-10">
+            <span className="text-sm font-semibold">
+              {location?.state?.firstName?.charAt(0)?.toUpperCase() || "?"}
+            </span>
           </div>
-          <div className="ml-3">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Chat with{" "}
-              {location?.state?.firstName + " " + location?.state?.lastName}
-            </h2>
-            <p className="text-sm text-green-500">Online</p>
-          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-semibold truncate">
+            {partnerName || "Chat"}
+          </h2>
+          <p className="text-xs text-success">Online</p>
         </div>
       </div>
 
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0 bg-base-200/50">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-8">
-            <p>No messages yet. Start the conversation!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center text-base-content/50 py-12">
+            <p className="text-4xl mb-3">💬</p>
+            <p className="text-sm">No messages yet. Say hello!</p>
           </div>
         ) : (
-          messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.firstName === user?.firstName
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
+          messages.map((message, index) => {
+            const isOwn = message.firstName === user?.firstName;
+            return (
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.firstName === user?.firstName
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-900 border border-gray-200"
-                }`}
+                key={index}
+                className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
               >
-                <p className="text-sm">{message.text}</p>
-                <p
-                  className={`text-xs mt-1 ${
-                    message.firstName === user?.firstName
-                      ? "text-blue-100"
-                      : "text-gray-500"
+                <div
+                  className={`max-w-[85%] sm:max-w-md px-4 py-2.5 rounded-2xl text-sm ${
+                    isOwn
+                      ? "bg-primary text-primary-content rounded-br-md"
+                      : "bg-base-100 text-base-content border border-base-300 rounded-bl-md"
                   }`}
                 >
-                  {message.timestamp}
-                </p>
+                  <p>{message.text}</p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
-      <div className="bg-white border-t border-gray-200 px-6 py-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-black resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows="1"
-              style={{ minHeight: "40px", maxHeight: "120px" }}
-            />
-          </div>
+      <div className="p-3 sm:p-4 border-t border-base-300 bg-base-100 shrink-0">
+        <div className="flex gap-2 items-end">
+          <textarea
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Type a message…"
+            className="textarea textarea-bordered flex-1 min-h-10 max-h-28 resize-none text-base"
+            rows={1}
+          />
           <button
+            type="button"
             onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn btn-primary shrink-0"
           >
             Send
           </button>

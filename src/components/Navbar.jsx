@@ -1,25 +1,43 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser, userRemoved } from "../api/userSlice";
 import { feedAdded } from "../api/feedSlice";
-import { Link, useNavigate } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 import devMatch from "../assets/DevMatch.png";
+
+const navLinkClass = ({ isActive }) =>
+  `btn btn-ghost btn-sm gap-2 font-medium ${
+    isActive ? "btn-active bg-primary/10 text-primary" : ""
+  }`;
 
 const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const [theme, setTheme] = useState("corporate");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("devconnect-theme");
+    const nextTheme = savedTheme === "dark" ? "dark" : "corporate";
+    setTheme(nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "corporate" ? "dark" : "corporate";
+    setTheme(nextTheme);
+    localStorage.setItem("devconnect-theme", nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+  };
 
   const handleLogout = async () => {
     try {
       await axios.post(
         BASE_URL + "/logout",
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       dispatch(userRemoved());
       dispatch(feedAdded(null));
@@ -30,176 +48,146 @@ const Navbar = () => {
   };
 
   return (
-    <div className="navbar bg-base-300 shadow-lg border-b border-base-200">
-      <div className="flex-1">
-        <Link
-          to={"/"}
-          className="btn btn-ghost normal-case hover:bg-base-200 transition-all duration-200"
-        >
-          <div className="flex items-center gap-2 md:gap-3">
+    <header className="sticky top-0 z-50 glass-nav">
+      <div className="navbar max-w-6xl mx-auto px-2 sm:px-4 min-h-14 sm:min-h-16">
+        <div className="flex-1">
+          <Link to="/" className="btn btn-ghost px-2 sm:px-3 gap-2 sm:gap-3">
             <img
               src={devMatch}
-              alt="DevConnect Logo"
-              className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain drop-shadow-sm bg-amber-800 rounded-full"
+              alt="DevConnect"
+              className="size-8 sm:size-9 rounded-xl object-contain ring-2 ring-primary/20"
             />
-            <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               DevConnect
             </span>
-          </div>
-        </Link>
-      </div>
+          </Link>
+        </div>
 
-      {user && (
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
-          <p className="text-xs sm:text-sm md:text-base hidden sm:block text-base-content/80 font-medium">
-            Welcome,{" "}
-            <span className="text-primary font-semibold">{user.firstName}</span>
-          </p>
+        {user && (
+          <>
+            <nav className="hidden md:flex items-center gap-1">
+              <NavLink to="/" end className={navLinkClass}>
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                Discover
+              </NavLink>
+              <NavLink to="/connections" className={navLinkClass}>
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Connections
+              </NavLink>
+              <NavLink to="/request" className={navLinkClass}>
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Requests
+              </NavLink>
+              <NavLink to="/premium" className={navLinkClass}>
+                <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Premium
+              </NavLink>
+            </nav>
 
-          <div className="dropdown dropdown-end">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn btn-ghost btn-circle avatar hover:scale-105 transition-transform duration-200"
-            >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-200">
-                <img
-                  alt="User profile"
-                  src={
-                    user.photo ||
-                    "https://via.placeholder.com/40x40/6B7280/FFFFFF?text=U"
-                  }
-                  className="object-cover"
-                />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                className="btn btn-ghost btn-circle"
+                onClick={toggleTheme}
+                aria-label={`Switch to ${
+                  theme === "corporate" ? "dark" : "light"
+                } mode`}
+                title={`Switch to ${
+                  theme === "corporate" ? "dark" : "light"
+                } mode`}
+              >
+                {theme === "corporate" ? (
+                  <svg
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.02 6.36l-.7-.7M6.34 6.34l-.7-.7m12.02 0l-.7.7M6.34 17.66l-.7.7M12 8a4 4 0 100 8 4 4 0 000-8z"
+                    />
+                  </svg>
+                )}
+              </button>
+              <p className="hidden lg:block text-sm text-base-content/70">
+                Hi, <span className="font-semibold text-primary">{user.firstName}</span>
+              </p>
+
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost btn-circle avatar"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full ring-2 ring-primary/30">
+                    <img
+                      alt="Profile"
+                      src={
+                        user.photo ||
+                        "https://via.placeholder.com/40x40/6B7280/FFFFFF?text=U"
+                      }
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow-xl border border-base-300"
+                >
+                  <li className="menu-title md:hidden px-2">Navigate</li>
+                  <li className="md:hidden">
+                    <NavLink to="/" end>Discover</NavLink>
+                  </li>
+                  <li className="md:hidden">
+                    <NavLink to="/connections">Connections</NavLink>
+                  </li>
+                  <li className="md:hidden">
+                    <NavLink to="/request">Requests</NavLink>
+                  </li>
+                  <li className="md:hidden">
+                    <NavLink to="/premium">Premium</NavLink>
+                  </li>
+                  <li className="md:hidden"><div className="divider my-0" /></li>
+                  <li>
+                    <NavLink to="/profile">Profile</NavLink>
+                  </li>
+                  <li>
+                    <button type="button" onClick={handleLogout} className="text-error">
+                      Logout
+                    </button>
+                  </li>
+                </ul>
               </div>
             </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-48 md:w-52 p-2 shadow-xl border border-base-200"
-            >
-              <li>
-                <Link
-                  to={"/profile"}
-                  className="justify-between text-sm md:text-base hover:bg-primary/10 transition-colors duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                    Profile
-                  </span>
-                  <span className="badge badge-primary badge-sm">New</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={"/connections"}
-                  className="text-sm md:text-base hover:bg-primary/10 transition-colors duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
-                    Connections
-                  </span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={"/request"}
-                  className="text-sm md:text-base hover:bg-primary/10 transition-colors duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    Requests
-                  </span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={"/premium"}
-                  className="text-sm md:text-base hover:bg-warning/10 transition-colors duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    Premium
-                  </span>
-                  <span className="badge badge-warning badge-sm">Upgrade</span>
-                </Link>
-              </li>
-              <div className="divider my-1"></div>
-              <li>
-                <a
-                  onClick={handleLogout}
-                  className="text-sm md:text-base hover:bg-error/10 text-error hover:text-error transition-colors duration-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                      />
-                    </svg>
-                    Logout
-                  </span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+    </header>
   );
 };
 
