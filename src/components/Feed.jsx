@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { feedAdded, selectFeed } from "../api/feedSlice";
 import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 import { selectUser } from "../api/userSlice";
 import UserCard from "./UserCard";
+import PageHeader from "./PageHeader";
+import EmptyState from "./EmptyState";
 
 const Feed = () => {
   const dispatch = useDispatch();
@@ -34,31 +36,41 @@ const Feed = () => {
 
   if (!userData || isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
+      <div className="flex justify-center items-center min-h-[50vh]">
         <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     );
   }
 
-  if (!feed || feed?.length === 0)
+  if (!feed || feed?.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
-          alt="No feed"
-          className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 mb-4 sm:mb-6 opacity-70"
+      <>
+        <PageHeader
+          title="Discover"
+          description="Find developers to connect with"
         />
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-700 mb-2 text-center">
-          No Feed Available
-        </h1>
-        <p className="text-sm sm:text-base text-gray-500 mb-4 text-center max-w-md">
-          There are currently no new users to show in your feed. Check back
-          later or update your profile to get better matches!
-        </p>
-      </div>
+        <EmptyState
+          icon="🔍"
+          title="No one new right now"
+          description="You've seen everyone in your feed for now. Check back later or polish your profile to attract more matches."
+          actionLabel="Edit profile"
+          actionTo="/profile"
+        />
+      </>
     );
+  }
 
-  return <UserCard user={feed[0]} />;
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-full max-w-md">
+        <PageHeader
+          title="Discover"
+          description={`${feed.length} developer${feed.length !== 1 ? "s" : ""} waiting — swipe or tap to connect`}
+        />
+      </div>
+      <UserCard user={feed[0]} />
+    </div>
+  );
 };
 
 export default Feed;

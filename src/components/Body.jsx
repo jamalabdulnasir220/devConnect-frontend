@@ -11,6 +11,7 @@ const Body = () => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const isLoginPage = location.pathname === "/login";
+  const isChatPage = location.pathname.startsWith("/chat");
   const [sessionChecked, setSessionChecked] = useState(
     () => isLoginPage || Boolean(user)
   );
@@ -44,13 +45,18 @@ const Body = () => {
     fetchCurrentUser();
   }, [isLoginPage, user, dispatch]);
 
+  const mainClass = isLoginPage
+    ? "flex flex-1 items-center justify-center px-4 py-8 sm:py-12"
+    : isChatPage
+      ? "flex flex-1 flex-col min-h-0 w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-4"
+      : "flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8";
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 px-4 py-4 mx-auto w-full">
+    <div className="min-h-dvh flex flex-col app-shell-bg">
+      {!isLoginPage && <Navbar />}
+      <main className={mainClass}>
         <Outlet context={{ sessionChecked }} />
       </main>
-      {/* <Footer /> */}
     </div>
   );
 };
